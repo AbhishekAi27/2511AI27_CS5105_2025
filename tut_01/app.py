@@ -117,11 +117,9 @@ def process_data(df_input, n_groups):
 
 # STREAMLIT APP
 
-st.set_page_config(page_title="Branch Grouping Tool", layout="wide")
-st.title("🎓 Branch-wise Group & Mix Tool")
+st.title("Branch-wise Group & Mix Tool")
 
-file_help = "Upload a .csv or .xlsx file. Make sure it has a 'Roll' column."
-uploaded_file = st.file_uploader("Upload file", type=["csv", "xlsx"], help=file_help)
+uploaded_file = st.file_uploader("Upload your input .csv or .xlsx file with 'Roll' 'column' ", type=["csv", "xlsx"])
 
 if uploaded_file:
     try:
@@ -130,18 +128,18 @@ if uploaded_file:
         else:
             df_input = pd.read_csv(uploaded_file)
     except Exception as e:
-        st.error(f"Error reading file: {e}")
+        st.error(f" Error reading file: {e}")
         st.stop()
 
     if 'Roll' not in df_input.columns:
-        st.error("The uploaded file must contain a 'Roll' column.")
+        st.error("The uploaded file must contain a 'Roll' 'column'.")
         st.stop()
 
     df_input['Roll'] = df_input['Roll'].astype(str)
     st.success(f" File loaded: {len(df_input)} rows | Columns: {', '.join(df_input.columns)}")
     st.dataframe(df_input.head(10), use_container_width=True)
 
-    st.markdown("#### 2. Set Grouping Parameters")
+    st.markdown("2. Set Grouping Parameters")
     col1, col2 = st.columns([1, 2])
     with col1:
         n_groups = st.number_input("Number of groups", min_value=1, step=1, value=3)
@@ -151,12 +149,11 @@ if uploaded_file:
     process_btn = st.button("Process and Generate Files")
 
     if process_btn:
-        with st.spinner("Processing your data, please wait..."):
-            # The `process_data` function must be defined/imported elsewhere
+        with st.spinner("Processing your data"):
             branch_files, branch_group_files, uniform_group_files, branch_stats_csv, uniform_stats_csv = process_data(
                 df_input, n_groups
             )
-        st.success("Processing complete! Download the results below.")
+        st.success("Processing complete! See the results below.")
 
         with st.expander("Branch-wise Split Files", expanded=False):
             for fname, content in branch_files.items():
