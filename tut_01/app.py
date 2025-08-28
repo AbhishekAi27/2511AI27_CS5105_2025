@@ -5,15 +5,16 @@ import math
 
 
 def process_data(df_input, n_groups):
-    # Ensure 'Roll' column is string type
+
     df_input['Roll'] = df_input['Roll'].astype(str)
-    # Extract unique branches
+
     unique_branches = df_input['Roll'].apply(lambda x: x[4:6]).unique().tolist()
-    # Create dict of branch DataFrames
+
     branch_dfs = {branch: df_input[df_input['Roll'].str[4:6] == branch].copy() for branch in unique_branches}
 
     branch_counts = {branch: len(branch_dfs[branch]) for branch in unique_branches}
-    # Group-branch-wise mix (round robin)
+
+    # Group-branch-wise mix 
     group_size = math.ceil(len(df_input) / n_groups)
     rr_groups = []
     current_branch_id = 0
@@ -63,7 +64,7 @@ def process_data(df_input, n_groups):
             desc_branch_counts[0] = (idx, count - take)
             remaining -= take
 
-    # Prepare uniform mix files
+    # Create uniform mix files
     branch_dfs_uniform = {branch: branch_dfs[branch].copy() for branch in unique_branches}
     uniform_mix_files = {}
     for idx, group in enumerate(uniform_group_allocations):
@@ -76,14 +77,14 @@ def process_data(df_input, n_groups):
         df_new.reset_index(drop=True).to_csv(buf, index=False)
         uniform_mix_files[f"group_uniform_g{idx+1}.csv"] = buf.getvalue()
 
-    # Branch-wise split files
+    # Branch-wise distributed files
     branch_wise_files = {}
     for branch, df_b in branch_dfs.items():
         buf = io.StringIO()
         df_b.to_csv(buf, index=False)
         branch_wise_files[f"branch_{branch}.csv"] = buf.getvalue()
 
-    # Stats generation for group-branch-wise mix
+    # Stats files will generate for group-branch-wise mix
     stat_branchwise = []
     for idx in range(n_groups):
         counts = {branch: 0 for branch in unique_branches}
@@ -98,7 +99,7 @@ def process_data(df_input, n_groups):
     df_stat_branchwise.to_csv(buf)
     branchwise_stat_csv = buf.getvalue()
 
-    # Stats generation for uniform mix
+    # Stats files will generate for uniform mix
     stat_uniform = []
     for idx in range(n_groups):
         counts = {branch: 0 for branch in unique_branches}
@@ -115,7 +116,7 @@ def process_data(df_input, n_groups):
 
     return branch_wise_files, group_branchwise_mix_files, uniform_mix_files, branchwise_stat_csv, uniform_stat_csv
 
-# STREAMLIT APP
+# STREAMLIT APP Connection
 
 st.title("Branch-wise Group & Mix Tool")
 
@@ -133,16 +134,12 @@ if uploaded_file:
 
     if 'Roll' not in df_input.columns:
         st.error("The uploaded file must contain a 'Roll' 'column'.")
-        st.stop()
-
-    df_input['Roll'] = df_input['Roll'].astype(str)
-    st.success(f" File loaded: {len(df_input)} rows | Columns: {', '.join(df_input.columns)}")
-    st.dataframe(df_input.head(10), use_container_width=True)
+        st.stop() 
 
     st.markdown("2. Set Grouping Parameters")
     col1, col2 = st.columns([1, 2])
     with col1:
-        n_groups = st.number_input("Number of groups", min_value=1, step=1, value=3)
+        n_groups = st.number_input("Number of groups", min_value=1, step=1, value=1)
     with col2:
         st.write("Specify how many groups or batches you'd like to generate from your data.")
 
@@ -181,6 +178,6 @@ if uploaded_file:
                 mime="text/csv"
             )
 else:
-    st.info(" Please upload a data file with a 'Roll' column to begin.")
+    st.info(" Please upload input file with a 'Roll' and 'column' to begin.")
 
     
