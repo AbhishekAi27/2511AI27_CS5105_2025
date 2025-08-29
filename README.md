@@ -24,3 +24,6 @@ This tool is useful for administrators, faculty, or organizers who need to creat
  6. Set number of groups you want to create.
  7. Click on 'Process and generate' button.
  8. Download output files.
+
+# Live app link
+https://2511ai27cs51052025-gb2ima8okdzkh5rhwup9zs.streamlit.app/
